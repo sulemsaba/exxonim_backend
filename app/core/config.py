@@ -8,7 +8,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     DATABASE_URL: str = (
-        "postgresql+asyncpg://app_user:strongpassword@localhost:5432/"
+        "postgresql+asyncpg://app_user:strongpassword@localhost:5433/"
         "marketing_site_dev"
     )
     JWT_SECRET: str = "change-this-secret"
