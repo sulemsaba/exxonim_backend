@@ -1,0 +1,2 @@
+"""Exxonim backend application package."""
+

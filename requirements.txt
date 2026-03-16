@@ -1,0 +1,10 @@
+fastapi[all]==0.115.0
+sqlalchemy==2.0.35
+asyncpg==0.31.0
+alembic==1.13.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+pydantic-settings==2.3.4
+python-dotenv==1.0.1
+greenlet==3.3.2
