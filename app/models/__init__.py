@@ -1,3 +1,4 @@
+from app.models.admin_user import AdminUser
 from app.models.base import Base
 from app.models.blog import BlogAuthor, BlogCategory, BlogPost
 from app.models.media import Media
@@ -8,6 +9,7 @@ from app.models.site_settings import SiteSetting
 from app.models.testimonial import Testimonial
 
 __all__ = [
+    "AdminUser",
     "Base",
     "BlogAuthor",
     "BlogCategory",
