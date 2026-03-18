@@ -19,6 +19,11 @@ async def get_admin_by_id(db: AsyncSession, admin_id: int) -> AdminUser | None:
     return result.scalar_one_or_none()
 
 
+async def get_all_admins(db: AsyncSession) -> list[AdminUser]:
+    result = await db.execute(select(AdminUser).order_by(AdminUser.email.asc()))
+    return list(result.scalars().all())
+
+
 async def authenticate_admin(
     db: AsyncSession,
     *,

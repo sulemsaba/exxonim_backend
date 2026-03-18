@@ -22,6 +22,17 @@ def _blog_post_select():
     )
 
 
+# Fetch posts that are published and featured on home
+async def get_featured_posts(db: AsyncSession, limit: int = 5) -> list[BlogPost]:
+    result = await db.execute(
+        _blog_post_select()
+        .where(BlogPost.is_published.is_(True), BlogPost.featured_on_home.is_(True))
+        .order_by(BlogPost.featured_slot.asc(), BlogPost.published_at.desc(), BlogPost.id.desc())
+        .limit(limit)
+    )
+    return list(result.scalars().unique().all())
+
+
 async def get_published_posts(
     db: AsyncSession,
     *,
