@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 from typing import Any, Awaitable, Callable
@@ -69,6 +70,82 @@ def _not_found(detail: str) -> HTTPException:
     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
+def _clean_text(value: Any) -> str:
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _has_article_body(content: Any) -> bool:
+    if not isinstance(content, dict):
+        return False
+
+    if _clean_text(content.get("html")):
+        return True
+
+    if _clean_text(content.get("introduction")):
+        return True
+
+    sections = content.get("sections")
+    if not isinstance(sections, list):
+        return False
+
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        if _clean_text(section.get("heading")):
+            return True
+        paragraphs = section.get("paragraphs")
+        if isinstance(paragraphs, list) and any(_clean_text(item) for item in paragraphs):
+            return True
+
+    return False
+
+
+def _is_publish_request(*, is_published: bool, published_at: datetime | None) -> bool:
+    if is_published:
+        return True
+    if published_at is None:
+        return False
+    comparison_now = datetime.now(published_at.tzinfo or timezone.utc)
+    return published_at <= comparison_now
+
+
+def _validate_blog_publish_fields(
+    *,
+    title: str,
+    slug: str,
+    excerpt: str | None,
+    content: Any,
+    category_id: int | None,
+    author_id: int | None,
+    featured_image: str | None,
+) -> None:
+    issues: list[str] = []
+
+    if not _clean_text(title):
+        issues.append("Title is required before publishing.")
+    if not _clean_text(slug):
+        issues.append("Slug is required before publishing.")
+    if not _clean_text(excerpt):
+        issues.append("Excerpt is required before publishing.")
+    if category_id is None:
+        issues.append("Category is required before publishing.")
+    if author_id is None:
+        issues.append("Author is required before publishing.")
+    if not _clean_text(featured_image):
+        issues.append("Cover image is required before publishing.")
+    if not _has_article_body(content):
+        issues.append("Add article body content before publishing.")
+
+    if issues:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "This post is not ready to publish.",
+                "issues": issues,
+            },
+        )
+
+
 async def _commit_with_conflict(
     db: AsyncSession,
     *,
@@ -119,7 +196,7 @@ def _build_token_response(admin: AdminUser) -> AdminTokenResponse:
     )
 
 
-@router.post("/login", response_model=AdminTokenResponse)
+@router.post("/auth/login", response_model=AdminTokenResponse)
 async def login_admin(
     payload: AdminLoginRequest,
     db: AsyncSession = Depends(get_db),
@@ -137,7 +214,7 @@ async def login_admin(
     return _build_token_response(admin)
 
 
-@router.post("/refresh", response_model=AdminAccessTokenResponse)
+@router.post("/auth/refresh", response_model=AdminAccessTokenResponse)
 async def refresh_admin_access_token(
     payload: AdminRefreshRequest,
     db: AsyncSession = Depends(get_db),
@@ -177,7 +254,7 @@ async def refresh_admin_access_token(
     return AdminAccessTokenResponse(access_token=access_token)
 
 
-@router.get("/me", response_model=AdminUserOut)
+@router.get("/auth/me", response_model=AdminUserOut)
 async def get_admin_me(
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> AdminUserOut:
@@ -206,6 +283,20 @@ async def create_blog_post(
         db, payload.author_id
     ) is None:
         raise _not_found("Author not found")
+
+    if _is_publish_request(
+        is_published=payload.is_published,
+        published_at=payload.published_at,
+    ):
+        _validate_blog_publish_fields(
+            title=payload.title,
+            slug=payload.slug,
+            excerpt=payload.excerpt,
+            content=payload.content,
+            category_id=payload.category_id,
+            author_id=payload.author_id,
+            featured_image=payload.featured_image,
+        )
 
     post = blog_crud.build_post(payload)
     db.add(post)
@@ -242,6 +333,22 @@ async def update_blog_post(
     if "author_id" in update_data and update_data["author_id"] is not None:
         if await blog_crud.get_author_by_id(db, update_data["author_id"]) is None:
             raise _not_found("Author not found")
+
+    next_is_published = update_data.get("is_published", post.is_published)
+    next_published_at = update_data.get("published_at", post.published_at)
+    if _is_publish_request(
+        is_published=next_is_published,
+        published_at=next_published_at,
+    ):
+        _validate_blog_publish_fields(
+            title=update_data.get("title", post.title),
+            slug=update_data.get("slug", post.slug),
+            excerpt=update_data.get("excerpt", post.excerpt),
+            content=update_data.get("content", post.content),
+            category_id=update_data.get("category_id", post.category_id),
+            author_id=update_data.get("author_id", post.author_id),
+            featured_image=update_data.get("featured_image", post.featured_image),
+        )
 
     blog_crud.apply_post_update(post, payload)
     db.add(post)
@@ -644,11 +751,7 @@ async def list_admin_site_settings(
     return await site_settings_crud.get_site_settings(db)
 
 
-@router.post(
-    "/site-settings",
-    response_model=SiteSettingOut,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("/site-settings", response_model=SiteSettingOut, status_code=status.HTTP_201_CREATED)
 async def create_site_setting(
     payload: SiteSettingCreate,
     db: AsyncSession = Depends(get_db),
@@ -656,43 +759,52 @@ async def create_site_setting(
 ) -> SiteSettingOut:
     setting = site_settings_crud.build_site_setting(payload)
     db.add(setting)
-    return await _refresh_and_load(db, setting, site_settings_crud.get_site_setting_by_id)
+    await _commit_with_conflict(db)
+    refreshed = await site_settings_crud.get_site_setting_by_key(db, setting.key)
+    if refreshed is None:
+      raise _not_found("Site setting not found")
+    return refreshed
 
 
-@router.get("/site-settings/{setting_id}", response_model=SiteSettingOut)
+@router.get("/site-settings/{setting_key}", response_model=SiteSettingOut)
 async def get_admin_site_setting(
-    setting_id: int,
+    setting_key: str,
     db: AsyncSession = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> SiteSettingOut:
-    setting = await site_settings_crud.get_site_setting_by_id(db, setting_id)
+    setting = await site_settings_crud.get_site_setting_by_key(db, setting_key)
     if setting is None:
         raise _not_found("Site setting not found")
     return setting
 
 
-@router.put("/site-settings/{setting_id}", response_model=SiteSettingOut)
+@router.put("/site-settings/{setting_key}", response_model=SiteSettingOut)
 async def update_site_setting(
-    setting_id: int,
+    setting_key: str,
     payload: SiteSettingUpdate,
     db: AsyncSession = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> SiteSettingOut:
-    setting = await site_settings_crud.get_site_setting_by_id(db, setting_id)
+    setting = await site_settings_crud.get_site_setting_by_key(db, setting_key)
     if setting is None:
         raise _not_found("Site setting not found")
     site_settings_crud.apply_site_setting_update(setting, payload)
     db.add(setting)
-    return await _refresh_and_load(db, setting, site_settings_crud.get_site_setting_by_id)
+    await _commit_with_conflict(db)
+    next_key = payload.key if isinstance(payload.key, str) and payload.key.strip() else setting.key
+    refreshed = await site_settings_crud.get_site_setting_by_key(db, next_key)
+    if refreshed is None:
+        raise _not_found("Site setting not found")
+    return refreshed
 
 
-@router.delete("/site-settings/{setting_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/site-settings/{setting_key}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_site_setting(
-    setting_id: int,
+    setting_key: str,
     db: AsyncSession = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> Response:
-    setting = await site_settings_crud.get_site_setting_by_id(db, setting_id)
+    setting = await site_settings_crud.get_site_setting_by_key(db, setting_key)
     if setting is None:
         raise _not_found("Site setting not found")
     return await _delete_and_commit(db, setting)

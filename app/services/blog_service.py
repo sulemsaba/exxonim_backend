@@ -1,4 +1,3 @@
-from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud import blog as blog_crud
 import logging
@@ -6,9 +5,15 @@ import random
 
 logger = logging.getLogger(__name__)
 
-async def list_home_posts(db: AsyncSession, skip: int, limit: int, featured_on_home: bool):
+async def list_home_posts(
+    db: AsyncSession,
+    skip: int,
+    limit: int,
+    featured: bool,
+    featured_on_home: bool,
+):
     try:
-        if featured_on_home:
+        if featured or featured_on_home:
             posts = await blog_crud.get_featured_posts(db, limit=limit)
             return {"posts": posts, "used_fallback": False}
         posts = await blog_crud.get_published_posts(db, skip=skip, limit=limit)

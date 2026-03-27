@@ -29,22 +29,6 @@ def create_refresh_token(subject: str, extra_claims: dict[str, Any] | None = Non
     return _create_token(subject=subject, expires_delta=expires_delta, extra_claims=extra_claims)
 
 
-def create_consultation_magic_token(
-    *,
-    consultation_id: int,
-    tracking_id: str,
-    email: str,
-) -> str:
-    return _create_token(
-        subject=str(consultation_id),
-        expires_delta=timedelta(days=7),
-        extra_claims={
-            "token_type": "consultation_magic",
-            "tracking_id": tracking_id,
-            "email": email,
-        },
-    )
-
 
 def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])

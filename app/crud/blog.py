@@ -82,6 +82,11 @@ async def get_all_authors(db: AsyncSession) -> list[BlogAuthor]:
     return list(result.scalars().all())
 
 
+async def get_author_by_slug(db: AsyncSession, slug: str) -> BlogAuthor | None:
+    result = await db.execute(select(BlogAuthor).where(BlogAuthor.slug == slug))
+    return result.scalar_one_or_none()
+
+
 async def get_author_by_id(db: AsyncSession, author_id: int) -> BlogAuthor | None:
     result = await db.execute(select(BlogAuthor).where(BlogAuthor.id == author_id))
     return result.scalar_one_or_none()

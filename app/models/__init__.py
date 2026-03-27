@@ -1,11 +1,6 @@
 from app.models.admin_user import AdminUser
 from app.models.base import Base
 from app.models.blog import BlogAuthor, BlogCategory, BlogPost
-from app.models.consultation import (
-    Consultation,
-    ConsultationStatusHistory,
-    NotificationLog,
-)
 from app.models.media import Media
 from app.models.navigation import NavigationItem
 from app.models.page import Page
@@ -19,11 +14,8 @@ __all__ = [
     "BlogAuthor",
     "BlogCategory",
     "BlogPost",
-    "Consultation",
-    "ConsultationStatusHistory",
     "Media",
     "NavigationItem",
-    "NotificationLog",
     "Page",
     "PricingPlan",
     "SiteSetting",

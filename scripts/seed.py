@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import json
@@ -34,7 +34,6 @@ ROUTES = {
     "about": "/about/",
     "faq": "/faq/",
     "services": "/services/",
-    "tracking": "/track-consultation/",
     "resources": "/resources/",
     "career": "/career/",
     "contact": "/contact/",
@@ -208,31 +207,6 @@ def build_blog_content(post: dict[str, Any], article_content: dict[str, Any]) ->
 
 
 def build_page_rows(extracted: dict[str, Any]) -> list[dict[str, Any]]:
-    service_tracking = {
-        "eyebrow": "Track your consultation",
-        "title": "A clearer view of what happens after you reach out.",
-        "description": (
-            "Exxonim keeps engagements structured around intake, review, submission, "
-            "and follow-up so you are not left guessing where the work stands."
-        ),
-        "checkpoints": extracted["checkpoints"],
-        "case_examples": extracted["caseExamples"],
-        "workflow_steps": [
-            {
-                "title": "1. Intake and scoping",
-                "detail": "We clarify the service, requirements, and target outcome before work starts.",
-            },
-            {
-                "title": "2. Preparation and submission",
-                "detail": "Documents are checked, gaps are flagged, and the filing pack is prepared.",
-            },
-            {
-                "title": "3. Follow-up and release",
-                "detail": "Exxonim tracks the outstanding step until approval, confirmation, or certificate handover.",
-            },
-        ],
-    }
-
     return [
         {
             "title": "Home",
@@ -247,7 +221,7 @@ def build_page_rows(extracted: dict[str, Any]) -> list[dict[str, Any]]:
                         "Exxonim supports founders, NGOs, and institutions with registration, "
                         "tax setup, licensing, and regulator-facing submissions across Tanzania."
                     ),
-                    "cta": {"label": "Request consultation", "href": ROUTES["contact"]},
+                    "cta": {"label": "Contact Exxonim", "href": ROUTES["contact"]},
                     "highlights": extracted["heroHighlights"],
                 },
                 "provider_section": {
@@ -352,13 +326,13 @@ def build_page_rows(extracted: dict[str, Any]) -> list[dict[str, Any]]:
                 "hero": {
                     "eyebrow": "Contact",
                     "title": "Reach Exxonim for registration, compliance, or licensing support.",
-                    "description": "Use the contact points below to start a consultation, ask a question, or confirm the next step for an ongoing request.",
+                    "description": "Use the contact points below to start a conversation, ask a question, or confirm the next step for ongoing work.",
                 },
                 "cards": [
                     {
                         "label": "Call",
                         "value": "+255 794 689 099",
-                        "description": "Primary line for new consultations and active follow-up.",
+                        "description": "Primary line for new inquiries and active follow-up.",
                         "action": {"label": "Call now", "href": "tel:+255794689099"},
                     },
                     {
@@ -405,15 +379,7 @@ def build_page_rows(extracted: dict[str, Any]) -> list[dict[str, Any]]:
                     "description": "Each service line is structured to reduce back-and-forth, keep documentation organized, and move your application or compliance work toward a clear next step.",
                     "service_groups": extracted["serviceGroups"],
                 },
-                "tracking_section": service_tracking,
             },
-        },
-        {
-            "title": "Track Consultation",
-            "slug": "track-consultation",
-            "meta_title": "Track Your Consultation",
-            "meta_description": "A clearer view of what happens after you reach out.",
-            "content": service_tracking,
         },
         {
             "title": "Resources",
@@ -466,7 +432,7 @@ def build_page_rows(extracted: dict[str, Any]) -> list[dict[str, Any]]:
                     {
                         "title": "What Exxonim can help with",
                         "paragraphs": [
-                            "Support covers registration readiness, missing document review, filing sequence questions, licensing clarification, and practical follow-up on ongoing work. Matters that need a formal commercial scope may be moved into a new consultation."
+                            "Support covers registration readiness, missing document review, filing sequence questions, licensing clarification, and practical follow-up on ongoing work. Matters that need a formal commercial scope may be moved into a dedicated service engagement."
                         ],
                     },
                 ],
@@ -602,15 +568,50 @@ def build_site_settings(extracted: dict[str, Any]) -> list[dict[str, Any]]:
                 "other_resources": extracted["otherResources"],
                 "tagline": "Where Innovation Meets Efficiency.",
                 "primary_cta": {
-                    "label": "Track Your Consultation",
-                    "href": ROUTES["tracking"],
+                    "label": "Contact Exxonim",
+                    "href": ROUTES["contact"],
                 },
+                "social_links": [
+                    {
+                        "platform": "linkedin",
+                        "label": "Exxonim",
+                        "url": "https://www.linkedin.com/company/exxonim/",
+                        "isActive": True,
+                    },
+                    {
+                        "platform": "instagram",
+                        "label": "@exxonim",
+                        "url": "https://www.instagram.com/exxonim/",
+                        "isActive": True,
+                    },
+                    {
+                        "platform": "x",
+                        "label": "@exxonim",
+                        "url": "https://x.com/exxonim",
+                        "isActive": True,
+                    },
+                ],
                 "copyright": "© 2026 Exxonim. All rights reserved.",
             },
         },
         {
             "key": "resources_page_media",
             "value": extracted["blogTopMedia"],
+        },
+        {
+            "key": "seo_defaults",
+            "value": {
+                "siteName": "Exxonim",
+                "canonicalBaseUrl": "https://exxonim.tz",
+                "defaultMetaTitle": "Exxonim | Registration, Compliance, and Licensing Support",
+                "defaultMetaDescription": (
+                    "Exxonim supports founders, NGOs, and institutions with registration, "
+                    "tax setup, licensing, and regulator-facing submissions across Tanzania."
+                ),
+                "defaultShareImageUrl": extracted["brand"]["lightLogoSrc"],
+                "robotsIndex": True,
+                "robotsFollow": True,
+            },
         },
     ]
 
@@ -868,3 +869,4 @@ async def seed() -> None:
 
 if __name__ == "__main__":
     asyncio.run(seed())
+

@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routers import api_router
 
-app = FastAPI(title="Marketing Site API", version="1.0.0")
+app = FastAPI(title="Exxonim Website Platform API", version="1.0.0")
 uploads_dir = Path(__file__).resolve().parents[1] / "uploads"
 uploads_dir.mkdir(parents=True, exist_ok=True)
 
