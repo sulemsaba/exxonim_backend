@@ -1,5 +1,11 @@
 from app.schemas.admin import (
     AdminAccessTokenResponse,
+    AdminDashboardActivityEvent,
+    AdminDashboardAlert,
+    AdminDashboardJobItem,
+    AdminDashboardMetric,
+    AdminDashboardPipelineItem,
+    AdminDashboardSummary,
     AdminLoginRequest,
     AdminRefreshRequest,
     AdminTokenResponse,
@@ -16,6 +22,13 @@ from app.schemas.blog import (
     BlogPostOut,
     BlogPostUpdate,
 )
+from app.schemas.consultation import (
+    ConsultationListResponse,
+    ConsultationOut,
+    ConsultationStatusHistoryOut,
+    ConsultationUpdate,
+)
+from app.schemas.job import JobCreate, JobOut, JobUpdate
 from app.schemas.media import MediaCreate, MediaOut, MediaUpdate
 from app.schemas.navigation import (
     NavigationItemCreate,
@@ -37,6 +50,12 @@ from app.schemas.testimonial import (
 
 __all__ = [
     "AdminAccessTokenResponse",
+    "AdminDashboardActivityEvent",
+    "AdminDashboardAlert",
+    "AdminDashboardJobItem",
+    "AdminDashboardMetric",
+    "AdminDashboardPipelineItem",
+    "AdminDashboardSummary",
     "AdminLoginRequest",
     "AdminRefreshRequest",
     "AdminTokenResponse",
@@ -50,6 +69,13 @@ __all__ = [
     "BlogPostCreate",
     "BlogPostOut",
     "BlogPostUpdate",
+    "ConsultationListResponse",
+    "ConsultationOut",
+    "ConsultationStatusHistoryOut",
+    "ConsultationUpdate",
+    "JobCreate",
+    "JobOut",
+    "JobUpdate",
     "MediaCreate",
     "MediaOut",
     "MediaUpdate",

@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.routers.admin import router as admin_router
 from app.routers.blog import router as blog_router
 from app.routers.health import router as health_router
+from app.routers.jobs import router as jobs_router
 from app.routers.media import router as media_router
 from app.routers.navigation import router as navigation_router
 from app.routers.pages import router as pages_router
@@ -14,6 +15,7 @@ api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])
 api_router.include_router(admin_router)
 api_router.include_router(blog_router)
+api_router.include_router(jobs_router)
 api_router.include_router(pages_router)
 api_router.include_router(navigation_router)
 api_router.include_router(pricing_router)
