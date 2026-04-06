@@ -11,30 +11,57 @@ class AdminUserOut(BaseModel):
 
     id: int
     email: EmailStr
+    full_name: str | None = None
+    role: str | None = None
+    roles: list[str] = Field(default_factory=list)
+    permissions: list[str] = Field(default_factory=list)
     is_active: bool
+    last_login_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
 
 class AdminLoginRequest(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8)
+    password: str
 
 
 class AdminRefreshRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
 
 
-class AdminTokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+class AdminSessionResponse(BaseModel):
+    token_type: Literal["cookie"] = "cookie"
     admin: AdminUserOut
 
 
-class AdminAccessTokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+class AdminRefreshResponse(BaseModel):
+    token_type: Literal["cookie"] = "cookie"
+    authenticated: bool = True
+
+
+class AdminLogoutResponse(BaseModel):
+    token_type: Literal["cookie"] = "cookie"
+    authenticated: bool = False
+
+
+class AdminRoleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    code: str
+    name: str
+    description: str | None = None
+    is_system: bool
+    permissions: list[str] = Field(default_factory=list)
+
+
+class AdminUserRoleUpdate(BaseModel):
+    role: str
+
+
+class AdminUserStatusUpdate(BaseModel):
+    is_active: bool
 
 
 class AdminDashboardActivityEvent(BaseModel):

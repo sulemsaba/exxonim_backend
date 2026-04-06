@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
+from app.workflow import ContentWorkflowStatus
 
 
 class TestimonialBase(BaseModel):
@@ -15,6 +16,7 @@ class TestimonialBase(BaseModel):
     content: str
     rating: int | None = None
     sort_order: int = 0
+    status: ContentWorkflowStatus | None = None
     is_active: bool = True
 
 
@@ -32,6 +34,7 @@ class TestimonialUpdate(BaseModel):
     content: str | None = None
     rating: int | None = None
     sort_order: int | None = None
+    status: ContentWorkflowStatus | None = None
     is_active: bool | None = None
 
 
@@ -48,6 +51,15 @@ class TestimonialOut(BaseModel):
     content: str
     rating: int | None = None
     sort_order: int
+    status: ContentWorkflowStatus
     is_active: bool
+    created_by_id: int | None = None
+    updated_by_id: int | None = None
+    submitted_at: datetime | None = None
+    submitted_by_id: int | None = None
+    reviewed_at: datetime | None = None
+    reviewed_by_id: int | None = None
+    published_at: datetime | None = None
+    published_by_id: int | None = None
     created_at: datetime
     updated_at: datetime

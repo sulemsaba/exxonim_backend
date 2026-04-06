@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Testimonial
@@ -10,7 +10,12 @@ from app.schemas.testimonial import TestimonialCreate, TestimonialUpdate
 async def get_active_testimonials(db: AsyncSession) -> list[Testimonial]:
     result = await db.execute(
         select(Testimonial)
-        .where(Testimonial.is_active.is_(True))
+        .where(
+            or_(
+                Testimonial.status == "published",
+                and_(Testimonial.status.is_(None), Testimonial.is_active.is_(True)),
+            )
+        )
         .order_by(Testimonial.sort_order.asc(), Testimonial.id.asc())
     )
     return list(result.scalars().all())

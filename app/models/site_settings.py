@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Any, Dict
 
 from sqlalchemy import String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
@@ -13,4 +13,4 @@ class SiteSetting(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     key: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    value: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    value: Mapped[Dict[str, Any]] = mapped_column(JSONB, nullable=False)

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
+from app.workflow import ContentWorkflowStatus
 
 
 class BlogAuthorBase(BaseModel):
@@ -76,6 +77,7 @@ class BlogPostBase(BaseModel):
     related_slugs: list[str] = Field(default_factory=list)
     meta_title: str | None = None
     meta_description: str | None = None
+    status: ContentWorkflowStatus | None = None
     published_at: datetime | None = None
     is_published: bool = False
 
@@ -100,6 +102,7 @@ class BlogPostUpdate(BaseModel):
     related_slugs: list[str] | None = None
     meta_title: str | None = None
     meta_description: str | None = None
+    status: ContentWorkflowStatus | None = None
     published_at: datetime | None = None
     is_published: bool | None = None
 
@@ -121,8 +124,16 @@ class BlogPostOut(BaseModel):
     related_slugs: list[str]
     meta_title: str | None = None
     meta_description: str | None = None
+    status: ContentWorkflowStatus
     published_at: datetime | None = None
     is_published: bool
+    created_by_id: int | None = None
+    updated_by_id: int | None = None
+    submitted_at: datetime | None = None
+    submitted_by_id: int | None = None
+    reviewed_at: datetime | None = None
+    reviewed_by_id: int | None = None
+    published_by_id: int | None = None
     created_at: datetime
     updated_at: datetime
     category: BlogCategoryOut | None = None

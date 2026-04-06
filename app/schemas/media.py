@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 class MediaBase(BaseModel):
     url: str
+    storage_key: str | None = None
     alt_text: str | None = None
     file_size: int | None = None
     mime_type: str | None = None
@@ -18,6 +19,7 @@ class MediaCreate(MediaBase):
 
 class MediaUpdate(BaseModel):
     url: str | None = None
+    storage_key: str | None = None
     alt_text: str | None = None
     file_size: int | None = None
     mime_type: str | None = None
@@ -28,6 +30,7 @@ class MediaOut(BaseModel):
 
     id: int
     url: str
+    storage_key: str | None = None
     alt_text: str | None = None
     file_size: int | None = None
     mime_type: str | None = None

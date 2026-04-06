@@ -1,4 +1,19 @@
-from app.crud import admin, blog, consultation, job, media, navigation, page, pricing, site_settings, testimonial
+from app.crud import (
+    admin,
+    blog,
+    consultation,
+    job,
+    media,
+    navigation,
+    notification,
+    page,
+    pricing,
+    privacy,
+    reporting,
+    service_request,
+    site_settings,
+    testimonial,
+)
 
 __all__ = [
     "admin",
@@ -7,8 +22,12 @@ __all__ = [
     "job",
     "media",
     "navigation",
+    "notification",
     "page",
     "pricing",
+    "privacy",
+    "reporting",
+    "service_request",
     "site_settings",
     "testimonial",
 ]

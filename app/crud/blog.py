@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -22,11 +22,18 @@ def _blog_post_select():
     )
 
 
+def _published_blog_post_filter():
+    return or_(
+        BlogPost.status == "published",
+        and_(BlogPost.status.is_(None), BlogPost.is_published.is_(True)),
+    )
+
+
 # Fetch posts that are published and featured on home
 async def get_featured_posts(db: AsyncSession, limit: int = 5) -> list[BlogPost]:
     result = await db.execute(
         _blog_post_select()
-        .where(BlogPost.is_published.is_(True), BlogPost.featured_on_home.is_(True))
+        .where(_published_blog_post_filter(), BlogPost.featured_on_home.is_(True))
         .order_by(BlogPost.featured_slot.asc(), BlogPost.published_at.desc(), BlogPost.id.desc())
         .limit(limit)
     )
@@ -41,7 +48,7 @@ async def get_published_posts(
 ) -> list[BlogPost]:
     result = await db.execute(
         _blog_post_select()
-        .where(BlogPost.is_published.is_(True))
+        .where(_published_blog_post_filter())
         .order_by(BlogPost.published_at.desc(), BlogPost.id.desc())
         .offset(skip)
         .limit(limit)
@@ -52,7 +59,7 @@ async def get_published_posts(
 async def get_post_by_slug(db: AsyncSession, slug: str) -> BlogPost | None:
     result = await db.execute(
         _blog_post_select()
-        .where(BlogPost.slug == slug, BlogPost.is_published.is_(True))
+        .where(BlogPost.slug == slug, _published_blog_post_filter())
     )
     return result.scalar_one_or_none()
 

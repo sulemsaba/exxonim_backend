@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from datetime import datetime
+from typing import List, Optional
 
 from sqlalchemy import Boolean, DateTime, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
@@ -21,11 +20,11 @@ class CareerJob(TimestampMixin, Base):
     location_mode: Mapped[str] = mapped_column(String(80), nullable=False)
     city: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     country: Mapped[str] = mapped_column(String(120), nullable=False, default="")
-    compensation_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    experience_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    compensation_label: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    experience_label: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    requirements: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    responsibilities: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    requirements: Mapped[List[str]] = mapped_column(JSONB, nullable=False, default=list)
+    responsibilities: Mapped[List[str]] = mapped_column(JSONB, nullable=False, default=list)
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

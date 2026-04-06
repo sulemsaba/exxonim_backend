@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from datetime import datetime
+from typing import List, Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,20 +19,20 @@ class Consultation(TimestampMixin, Base):
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    company: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    company: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
-    assigned_to: Mapped[int | None] = mapped_column(
+    assigned_to: Mapped[Optional[int]] = mapped_column(
         ForeignKey("admin_users.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    public_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    public_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     assigned_admin = relationship("AdminUser", lazy="joined")
-    status_history: Mapped[list["ConsultationStatusHistory"]] = relationship(
+    status_history = relationship(
         "ConsultationStatusHistory",
         back_populates="consultation",
         cascade="all, delete-orphan",
@@ -50,18 +49,18 @@ class ConsultationStatusHistory(Base):
         nullable=False,
         index=True,
     )
-    old_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    old_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     new_status: Mapped[str] = mapped_column(String(50), nullable=False)
-    changed_by: Mapped[int | None] = mapped_column(
+    changed_by: Mapped[Optional[int]] = mapped_column(
         ForeignKey("admin_users.id", ondelete="SET NULL"),
         nullable=True,
     )
-    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
     )
 
-    consultation: Mapped[Consultation] = relationship("Consultation", back_populates="status_history")
+    consultation = relationship("Consultation", back_populates="status_history")
     changed_by_admin = relationship("AdminUser", lazy="joined")
